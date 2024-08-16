@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Ball Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        #gameArea {
+            position: relative;
+            width: 320px;
+            height: 480px;
+            background-color: #333;
+            overflow: hidden;
+        }
+
+        #paddle {
+            position: absolute;
+            width: 100px;
+            height: 20px;
+            bottom: 10px;
+            background-color: #fff;
+        }
+
+        #ball {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ff0000;
+            top: 0;
+            left: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <div id="paddle"></div>
+        <div id="ball"></div>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const paddle = document.getElementById('paddle');
+        const ball = document.getElementById('ball');
+        
+        let paddleX = (gameArea.offsetWidth - paddle.offsetWidth) / 2;
+        let ballX = ball.offsetLeft;
+        let ballY = ball.offsetTop;
+        let ballSpeedY = 2;
+        let ballSpeedX = 2;
+        
+        paddle.style.left = `${paddleX}px`;
+
+        // Move paddle based on touch
+        gameArea.addEventListener('touchmove', (e) => {
+            const touchX = e.touches[0].clientX - gameArea.offsetLeft;
+            paddleX = Math.max(0, Math.min(gameArea.offsetWidth - paddle.offsetWidth, touchX - paddle.offsetWidth / 2));
+            paddle.style.left = `${paddleX}px`;
+        });
+
+        // Game loop
+        function updateGame() {
+            ballY += ballSpeedY;
+            ballX += ballSpeedX;
+
+            // Ball collision with walls
+            if (ballX <= 0 || ballX >= gameArea.offsetWidth - ball.offsetWidth) {
+                ballSpeedX = -ballSpeedX;
+            }
+            if (ballY <= 0) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            // Ball collision with paddle
+            if (
+                ballY >= gameArea.offsetHeight - paddle.offsetHeight - ball.offsetHeight &&
+                ballX + ball.offsetWidth > paddleX &&
+                ballX < paddleX + paddle.offsetWidth
+            ) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            // Reset ball if it falls below the paddle
+            if (ballY > gameArea.offsetHeight) {
+                ballX = gameArea.offsetWidth / 2;
+                ballY = 0;
+            }
+
+            ball.style.top = `${ballY}px`;
+            ball.style.left = `${ballX}px`;
+
+            requestAnimationFrame(updateGame);
+        }
+
+        updateGame();
+    </script>
+</body>
+</html>
